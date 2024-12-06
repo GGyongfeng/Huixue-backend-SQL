@@ -1,0 +1,28 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "username": "admin",
+            "password": "123456",
+            "name": "管理员",
+            "role": "admin",
+            "city": "北京市"
+        },
+        {
+            "id": 2,
+            "username": "guyongfeng",
+            "password": "654321",
+            "name": "古永丰",
+            "role": "admin",
+            "city": "天津市"
+        },
+        {
+            "id": 3,
+            "username": "ShiChenxi",
+            "password": "zhenhuichi",
+            "name": "施忱希",
+            "role": "admin",
+            "city": "河北市"
+        }
+    ]
+} 
