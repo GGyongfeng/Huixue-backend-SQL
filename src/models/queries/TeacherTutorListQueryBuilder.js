@@ -91,8 +91,12 @@ class TeacherTutorListQueryBuilder {
 
   addKeywordSearch(keyword) {
     if (keyword) {
-      this.sql += ` AND (t.requirement_desc LIKE ?)`  // 教师端只搜索需求描述
-      this.values.push(`%${keyword}%`)
+      this.sql += ` AND (
+        t.requirement_desc LIKE ? 
+        OR t.tutor_code LIKE ?
+        OR t.address LIKE ?
+      )`
+      this.values.push(`%${keyword}%`, `%${keyword}%`, `%${keyword}%`)
     }
     return this
   }

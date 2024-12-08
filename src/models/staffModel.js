@@ -5,8 +5,9 @@ const pool = require('../data/db');
 const staffModel = {
     // 登录验证时只查询基本信息
     async findByUsername(username) {
+        console.log('查询用户信息:', username);
         const sql = `
-            SELECT id, username, password, city
+            SELECT id, username, password, role, city
             FROM staff 
             WHERE username = ? AND is_deleted = FALSE
             LIMIT 1

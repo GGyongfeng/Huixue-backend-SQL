@@ -23,6 +23,8 @@ router.post('/login', async (req, res, next) => {
         // 只查询基本信息进行登录验证
         const staff = await staffModel.findByUsername(username);
         
+        console.log('登录用户信息:', staff);
+        
         // 先检查用户是否存在
         if (!staff) {
             return res.json({
@@ -45,7 +47,9 @@ router.post('/login', async (req, res, next) => {
         const token = jwt.sign(
             { 
                 id: staff.id, 
-                username: staff.username
+                username: staff.username,
+                role: staff.role,
+                city: staff.city  // 在 token 中也添加 city
             },
             SECRET_KEY,
             { expiresIn: '30 days' }
@@ -59,8 +63,10 @@ router.post('/login', async (req, res, next) => {
             data: {
                 id: staff.id,
                 username: staff.username,
-                name: userInfo?.real_name || staff.username,  // 如果没有真实姓名，使用用户名
+                name: userInfo?.real_name || staff.username,
                 avatar: userInfo?.avatar_url || '',
+                role: staff.role,
+                city: staff.city,  // 添加 city 信息
                 token: token
             },
             message: '登录成功'

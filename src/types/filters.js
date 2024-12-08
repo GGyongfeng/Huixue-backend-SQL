@@ -18,6 +18,20 @@ const TUTOR_FILTERS = [
     options: ['一对一', '一对多']
   },
   {
+    field: 'order_tags',
+    label: '订单标签',
+    options: [
+      '专职单子', 
+      '好单子', 
+      '加急单子', 
+      '特殊单子',
+      '长期', 
+      '短期',
+      '寒假',
+      '暑假'
+    ]
+  },
+  {
     field: 'student_grade',
     label: '学生年级',
     options: ['幼儿', '小学', '初一', '初二', '初三', '高一', '高二', '高三', '其他']

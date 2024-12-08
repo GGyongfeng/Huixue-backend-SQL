@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const TutorsModel = require('@/models/tutorsModel')
+const resCode = require('@/constants/resCode')
 
 router.post('/', async (req, res) => {
   try {
@@ -11,7 +12,7 @@ router.post('/', async (req, res) => {
     const orderId = await TutorsModel.create(data, staffId)
     
     res.json({
-      code: 0,
+      code: resCode.SUCCESS,
       message: '创建成功',
       data: { id: orderId }
     })
@@ -21,12 +22,12 @@ router.post('/', async (req, res) => {
     // 区分错误类型
     if (error.message === '订单编号已存在') {
       res.json({
-        code: 400,
+        code: resCode.INVALID_PARAMS,
         message: '订单编号已存在，请更换编号'
       })
     } else {
       res.json({
-        code: 500,
+        code: resCode.INTERNAL_ERROR,
         message: '创建失败'
       })
     }
