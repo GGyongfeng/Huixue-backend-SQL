@@ -1,20 +1,18 @@
 -- 1. 插入 staff 数据
 INSERT INTO staff (username, password, role, city) VALUES
 -- 管理员账号
-('admin', 'imguyongfeng', 'admin', '天津'),
+('admin', '654321', 'admin', '天津'),
 
 -- 经理账号
-('manager01', 'password123', 'manager', '天津'),
-('manager02', 'password123', 'manager', '天津'),
+('manager', '654321', 'manager', '天津'),
+('manager02', '654321', 'manager', '天津'),
 
 -- 普通员工账号
-('staff01', 'password123', 'staff', '天津'),
-('staff02', 'password123', 'staff', '天津'),
+('staff', '654321', 'staff', '天津'),
 ('guyongfeng', '654321', 'staff', '天津'),
 
 -- 游客账号
-('visitor01', 'password123', 'visitor', '天津'),
-('visitor02', 'password123', 'visitor', '天津');
+('visitor', '654321', 'visitor', '天津');
 
 -- 2. 插入 staff_info 数据
 INSERT INTO staff_info (id, real_name, mobile, gender) VALUES

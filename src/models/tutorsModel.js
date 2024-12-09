@@ -27,8 +27,9 @@ class TutorsModel {
         tutor_code, student_gender, teaching_type, student_grade,
         subjects, teacher_type, teacher_gender, order_tags,
         district, city, address, grade_score, student_level,
-        tutoring_time, salary, requirement_desc, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        tutoring_time, salary, requirement_desc, phone_number, 
+        order_source, created_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
     const values = [
       data.tutor_code,
@@ -47,6 +48,8 @@ class TutorsModel {
       data.tutoring_time,
       data.salary,
       data.requirement_desc,
+      data.phone_number || null,
+      data.order_source || null,
       staffId
     ]
 
@@ -113,23 +116,23 @@ class TutorsModel {
   }
 
   // 获取单个家教订单详情
-  static async getById(id) {
+  static async getById(idOrCode) {
     const sql = `
-      SELECT t.*, 
-             c.username as created_by_name,
-             u.username as updated_by_name,
-             d.username as deleted_by_name,
-             dt.name as deal_teacher_name,
-             ds.username as deal_staff_name
-      FROM tutor_orders t
-      LEFT JOIN staff c ON t.created_by = c.id
-      LEFT JOIN staff u ON t.updated_by = u.id
-      LEFT JOIN staff d ON t.deleted_by = d.id
-      LEFT JOIN teachers dt ON t.deal_teacher_id = dt.id
-      LEFT JOIN staff ds ON t.deal_staff_id = ds.id
-      WHERE t.id = ? AND t.is_deleted = FALSE
+        SELECT t.*, 
+               c.username as created_by_name,
+               u.username as updated_by_name,
+               d.username as deleted_by_name,
+               dt.name as deal_teacher_name,
+               ds.username as deal_staff_name
+        FROM tutor_orders t
+        LEFT JOIN staff c ON t.created_by = c.id
+        LEFT JOIN staff u ON t.updated_by = u.id
+        LEFT JOIN staff d ON t.deleted_by = d.id
+        LEFT JOIN teachers dt ON t.deal_teacher_id = dt.id
+        LEFT JOIN staff ds ON t.deal_staff_id = ds.id
+        WHERE (t.id = ? OR t.tutor_code = ?) AND t.is_deleted = FALSE
     `
-    const rows = await db.query(sql, [id])
+    const rows = await db.query(sql, [idOrCode, idOrCode])
     return rows[0]
   }
 

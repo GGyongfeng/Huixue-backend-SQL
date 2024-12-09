@@ -1,7 +1,3 @@
--- 删除 tutor_orders 表
-DROP TABLE IF EXISTS tutor_orders;   
-
-
 --  插入 tutor_orders 数据
 INSERT INTO tutor_orders (
     tutor_code, student_gender, teaching_type, student_grade, subjects,
