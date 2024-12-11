@@ -22,6 +22,14 @@ class TutorsModel {
       throw new Error('订单编号已存在')
     }
 
+    // 处理科目，如果有不在预定义选项中的科目，替换为"其他"
+    const validSubjects = ['语文', '数学', '英语', '物理', '化学', '生物', '历史', '地理', '政治', '国际课程', '其他'];
+    const processedSubjects = data.subjects.map(subject => 
+      validSubjects.includes(subject) ? subject : '其他'
+    );
+    // 去重，避免多个"其他"
+    const uniqueSubjects = [...new Set(processedSubjects)];
+
     const sql = `
       INSERT INTO tutor_orders (
         tutor_code, student_gender, teaching_type, student_grade,
@@ -36,9 +44,9 @@ class TutorsModel {
       data.student_gender,
       data.teaching_type,
       data.student_grade,
-      data.subjects.join(','),
-      data.teacher_type || '无',
-      data.teacher_gender || '无',
+      uniqueSubjects.join(','),
+      data.teacher_type || null,
+      data.teacher_gender || null,
       data.order_tags ? data.order_tags.join(',') : null,
       data.district,
       data.city || '天津',

@@ -31,6 +31,7 @@ VALUES
 (1, '监控中心', 'Dashboard', 'Dashboard', 'e721', '/dashboard', FALSE),
 (2, '家教订单', 'Tutors Orders', 'Tutors', 'e7ae', '/tutors', FALSE),
 (3, '用户中心', 'User manguage', 'User', 'e84f', '/user', TRUE),
+(4, '通知编辑', 'Teacher notice', 'Notice', 'e84f', '/notification', FALSE),
 (18, '结果页面', 'Result page', 'Result', 'e715', '/result', FALSE),
 (17, '版本计划', 'Version Plan', 'Plan', 'e712', '/plan', FALSE);
 
@@ -46,6 +47,9 @@ VALUES
 (201, '订单列表', 'Orders list', '/tutors/list', 2, 'Hot', FALSE),
 (202, '上传订单', 'Create Order', '/tutors/create', 2, NULL, FALSE),
 (203, '编辑订单', 'Edit Order', '/tutors/edit', 2, NULL, FALSE),
+
+-- 通知
+(501, '更新通知', 'Notice update', '/notification/update', 4, NULL, FALSE),
 
 -- 用户中心子菜单
 (301, '个人中心', 'User center', '/user/user', 3, NULL, TRUE),
@@ -76,9 +80,11 @@ INSERT INTO `role_menu_relation` (role, menu_id) VALUES
 ('admin', 2), ('admin', 201), ('admin', 202), ('admin', 203),
 -- 用户中心
 ('admin', 3), ('admin', 301),
+-- 通知
+('admin', 4), ('admin', 501),
 -- 结果页面
 ('admin', 401), ('admin', 402), 
---版本计划
+-- 版本计划
 ('admin', 17), ('admin', 1701),
 
 -- 经理可以访问部分菜单
@@ -88,7 +94,9 @@ INSERT INTO `role_menu_relation` (role, menu_id) VALUES
 ('manager', 2), ('manager', 201), ('manager', 202), ('manager', 203),
 -- 用户中心
 ('manager', 3), ('manager', 301),
---版本计划
+-- 通知
+('manager', 4), ('manager', 501),
+-- 版本计划
 ('manager', 17), ('manager', 1701),
 
 -- 普通员工只能访问基础功能
@@ -96,6 +104,8 @@ INSERT INTO `role_menu_relation` (role, menu_id) VALUES
 ('staff', 2), ('staff', 201), ('staff', 202), ('staff', 203),
 -- 用户中心
 ('staff', 3), ('staff', 301),
+-- 通知
+('staff', 4), ('staff', 501),
 
 -- 游客最小权限
 ('visitor', 2), ('visitor', 201); -- 只能查看订单列表
