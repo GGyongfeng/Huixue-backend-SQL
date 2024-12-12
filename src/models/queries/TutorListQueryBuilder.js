@@ -1,28 +1,28 @@
-const db = require('../../data/db')
+const BaseQueryBuilder = require('./BaseQueryBuilder');
+const db = require('../../data/dbManager');
 const { FILTER_FIELDS, TUTOR_FILTERS, convertBooleanValue } = require('../../types/filters')
 
 /**
  * 家教订单列表查询构建器
  * 用于构建复杂的订单列表查询SQL
  */
-class TutorListQueryBuilder {
+class TutorListQueryBuilder extends BaseQueryBuilder {
   /**
    * 初始化查询构建器
    * 设置基础的SELECT语句，包含所有需要的表连接
    */
-  constructor() {
+  constructor(city) {
+    super(city);
     this.sql = `
       SELECT t.*, 
              c.username as created_by_name,
              u.username as updated_by_name,
              d.username as deleted_by_name,
-             dt.name as deal_teacher_name,
              ds.username as deal_staff_name
       FROM tutor_orders t
       LEFT JOIN staff c ON t.created_by = c.id
       LEFT JOIN staff u ON t.updated_by = u.id
       LEFT JOIN staff d ON t.deleted_by = d.id
-      LEFT JOIN teachers dt ON t.deal_teacher_id = dt.id
       LEFT JOIN staff ds ON t.deal_staff_id = ds.id
       WHERE 1=1
     `
@@ -57,7 +57,7 @@ class TutorListQueryBuilder {
           // 例如：FIND_IN_SET('数学', t.subjects) OR FIND_IN_SET('英语', t.subjects)
           this.sql += filters[field].map(() => `FIND_IN_SET(?, t.${field})`).join(' OR ')
           this.sql += `)`
-          // 添加参数值到查询参数数组
+          // 添加参数值到查询参数数��
           this.values.push(...filters[field])
         } else if (type === 'boolean') {
           // 处理布尔类型字段
@@ -206,34 +206,27 @@ class TutorListQueryBuilder {
    * @returns {Promise<Object>} 返回查询结果，包含列表数据和总数
    */
   async execute() {
-    // console.log('=== TutorListQueryBuilder.js:最终查询参数 ===')
-    // console.log('最终参数:', this.values)
-    
-    // 构建计数查询
     const countSql = `
       SELECT COUNT(*) as total 
       FROM tutor_orders t 
       WHERE 1=1 
       ${this.sql.split('WHERE 1=1')[1].split('ORDER BY')[0]}
-    `
+    `;
     
-    // 不再需要从 values 中移除 LIMIT 参数，因为现在直接写在SQL中
-    const countValues = [...this.values]
-
     try {
       const [rows, totalResult] = await Promise.all([
-        db.query(this.sql, this.values),
-        db.query(countSql, countValues)
-      ])
+        super.execute(),
+        db.query(this.city, countSql, this.values)
+      ]);
 
       return {
         list: rows,
         total: totalResult[0].total
-      }
+      };
     } catch (error) {
-      console.error('SQL:', this.sql)
-      console.error('Values:', this.values)
-      throw error
+      console.error('SQL:', this.sql);
+      console.error('Values:', this.values);
+      throw error;
     }
   }
 }

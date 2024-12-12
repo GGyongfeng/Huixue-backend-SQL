@@ -4,8 +4,8 @@
   "description": "汇学教育管理项目",
   "main": "index.js",
   "scripts": {
-    "dev": "node index.js",
-    "prod": "node index.js",
+    "dev": "cross-env NODE_ENV=development node index.js",
+    "prod": "cross-env NODE_ENV=production node index.js",
     "build": "node build/build.js",
     "start": "cross-env NODE_ENV=production node index.js"
   },
@@ -35,5 +35,8 @@
     "@constants": "src/constants"
   },
   "author": "古永丰 <yongfengu@tju.edu.cn>",
-  "license": "CC-BY-NC-ND-4.0"
+  "license": "CC-BY-NC-ND-4.0",
+  "engines": {
+    "node": ">=16.9.0"
+  }
 }

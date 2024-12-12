@@ -51,69 +51,30 @@ const { errorResponse } = require('@/utils/errorHandler')
  * @apiParam {String} [city] 城市
  */
 
-router.get('/', async (req, res, next) => {
+router.get('/', async (req, res) => {
   try {
-    const { 
-      page = 1, 
-      pageSize = 20, 
-      keyword,
-      district,
-      student_grade,
-      student_gender,
-      teacher_gender,
-      teacher_type,
-      subjects,
-      teaching_type,
-      city,
-      order_tags
-    } = req.query
+    const { page = 1, pageSize = 20 } = req.query;
+    const city = req.city;  // 从请求对象获取城市信息
+    console.log('Using city:', city);  // 调试日志
 
-    // 处理多选参数
-    const processArrayParam = (param) => {
-      if (!param) return undefined
-      return Array.isArray(param) ? param : [param]
-    }
+    const result = await TutorsModel.getTeacherList(city, {
+      // filters
+    }, {
+      page,
+      pageSize
+    });
 
-    const filters = {
-      keyword,
-      district: processArrayParam(district),
-      student_grade: processArrayParam(student_grade),
-      student_gender: processArrayParam(student_gender),
-      teacher_gender: processArrayParam(teacher_gender),
-      teacher_type: processArrayParam(teacher_type),
-      subjects: processArrayParam(subjects),
-      teaching_type: processArrayParam(teaching_type),
-      city: processArrayParam(city),
-      order_tags: processArrayParam(order_tags),
-      is_deleted: false,
-      is_visible: true
-    }
-
-    const pagination = {
-      page: parseInt(page) || 1,
-      pageSize: parseInt(pageSize) || 20
-    }
-
-    // 改回使用 getTeacherList，因为需要特定的数据格式
-    const result = await TutorsModel.getTeacherList(filters, pagination)
-    
     res.json({
-      code: resCode.SUCCESS,
-      message: '获取成功',
-      data: {
-        list: result.list,
-        total: result.total,
-        page: pagination.page,
-        pageSize: pagination.pageSize
-      }
-    })
+      code: 200,
+      data: result
+    });
   } catch (error) {
-    next(errorResponse(
-      resCode.INTERNAL_ERROR,
-      '获取家教订单列表失败',
-      error
-    ))
+    console.error('Error in tutorslist:', error);
+    res.status(500).json({
+      code: 500,
+      message: error.message
+    });
   }
-})
+});
 
 module.exports = router

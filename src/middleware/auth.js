@@ -1,94 +1,87 @@
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = process.env.JWT_SECRET_KEY;
-const resCode = require('@/constants/resCode');
+const { CITY_CODES } = require('../data/dbManager');
 
-// 角色权限等级
-const ROLE_LEVELS = {
-    'admin': 4,    // 管理员最高权限
-    'manager': 3,  // 经理次高权限
-    'staff': 2,    // 普通员工
-    'visitor': 1   // 游客最低权限
-};
-
-// 验证token的中间件
-const authMiddleware = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-        console.log('此请求路径：', req.url, '未提供认证令牌');
-        return res.status(401).json({
-            code: resCode.UNAUTHORIZED,
-            data: null,
-            message: '未提供认证令牌'
-        });
-    }
-
+const authMiddleware = async (req, res, next) => {
+    console.log('\n=== Auth Middleware Start ===');
+    console.log('Request Path:', req.path);
+    console.log('Authorization Header:', req.headers.authorization ? 'Present' : 'Missing');
+    
     try {
-        const decoded = jwt.verify(token, SECRET_KEY);
-        req.user = decoded; // 将解码后的用户信息存储到req对象中
+        // 从请求头获取 token
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            console.log('Error: No token provided');
+            return res.status(401).json({
+                code: 401,
+                message: '未提供认证令牌'
+            });
+        }
+
+        // 验证 token
+        console.log('Verifying token...');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        console.log('Token decoded:', {
+            username: decoded.username,
+            role: decoded.role,
+            city: decoded.city
+        });
+        
+        // 获取用户信息
+        let city = decoded.city || '天津';  // 从 token 中获取城市，默认天津
+        
+        // 如果 token 中的城市代码是简写形式，转换为完整城市名
+        if (CITY_CODES[city]) {
+            // 如果已经是完整城市名，保持不变
+            city = city;
+        } else {
+            // 查找对应的城市名
+            const cityName = Object.entries(CITY_CODES).find(([name, code]) => code === city)?.[0];
+            if (cityName) {
+                city = cityName;
+            }
+        }
+        console.log('Resolved city:', city);
+
+        // 直接使用 token 中的信息
+        req.user = {
+            username: decoded.username,
+            role: decoded.role,
+            city: decoded.city,
+            id: decoded.id
+        };
+        req.city = city;
+
+        console.log('Auth successful, added to request:', {
+            city: req.city,
+            userId: req.user.id,
+            role: req.user.role
+        });
+
+        console.log('=== Auth Middleware End ===\n');
         next();
     } catch (error) {
-        return res.status(401).json({
-            code: resCode.UNAUTHORIZED,
-            data: null,
-            message: '登录信息已过期,请重新登录'
+        console.error('Auth Error:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
         });
+
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({
+                code: 401,
+                message: '无效的认证令牌'
+            });
+        }
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                code: 401,
+                message: '认证令牌已过期'
+            });
+        }
+        next(error);
     }
-};
-
-// 角色验证中间件
-const roleAuth = (requiredRole) => {
-    return (req, res, next) => {
-        const userRole = req.user?.role;
-        
-        if (!userRole || !ROLE_LEVELS[userRole]) {
-            return res.status(403).json({
-                code: resCode.FORBIDDEN,
-                data: null,
-                message: '无效的用户角色'
-            });
-        }
-
-        // 检查用户角色等级是否满足要求
-        if (ROLE_LEVELS[userRole] >= ROLE_LEVELS[requiredRole]) {
-            next();
-        } else {
-            return res.status(403).json({
-                code: resCode.FORBIDDEN,
-                data: null,
-                message: '权限不足'
-            });
-        }
-    };
-};
-
-// 多角色验证中间件
-const multiRoleAuth = (allowedRoles) => {
-    return (req, res, next) => {
-        const userRole = req.user?.role;
-        
-        if (!userRole || !ROLE_LEVELS[userRole]) {
-            return res.status(403).json({
-                code: resCode.FORBIDDEN,
-                data: null,
-                message: '无效的用户角色'
-            });
-        }
-
-        // 检查用户角色是否在允许的角色列表中
-        if (allowedRoles.includes(userRole)) {
-            next();
-        } else {
-            return res.status(403).json({
-                code: resCode.FORBIDDEN,
-                data: null,
-                message: '权限不足'
-            });
-        }
-    };
 };
 
 module.exports = {
-    authMiddleware,
-    roleAuth,
-    multiRoleAuth
+    authMiddleware
 };

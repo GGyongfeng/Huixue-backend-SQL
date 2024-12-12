@@ -7,9 +7,10 @@ router.post('/', async (req, res) => {
   try {
     const data = req.body
     const staffId = req.user.id
+    const city = req.city
 
     // 创建订单
-    const orderId = await TutorsModel.create(data, staffId)
+    const orderId = await TutorsModel.create(city, data, staffId)
     
     res.json({
       code: resCode.SUCCESS,
@@ -28,7 +29,8 @@ router.post('/', async (req, res) => {
     } else {
       res.json({
         code: resCode.INTERNAL_ERROR,
-        message: '创建失败'
+        message: '创建失败',
+        error: error.message
       })
     }
   }

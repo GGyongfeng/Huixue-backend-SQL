@@ -1,80 +1,74 @@
 const express = require('express');
+const router = express.Router();
 const jwt = require('jsonwebtoken');
 const staffModel = require('@/models/staffModel');
-const router = express.Router();
+const resCode = require('@/constants/resCode');
+const { errorResponse } = require('@/utils/errorHandler');
 
-const SECRET_KEY = process.env.JWT_SECRET_KEY;
-
-/**
- * @typedef {import('@/types').UserInfo} UserInfo
- * @typedef {import('@/types').ApiResponse} ApiResponse
- */
-
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @param {import('express').NextFunction} next
- * @returns {Promise<void>}
- */
-router.post('/login', async (req, res, next) => {
+// 登录接口
+router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // 只查询基本信息进行登录验证
-        const staff = await staffModel.findByUsername(username);
-        
-        console.log('登录用户信息:', staff);
-        
-        // 先检查用户是否存在
-        if (!staff) {
+        // 验证参数
+        if (!username || !password) {
             return res.json({
-                code: 400,
-                data: null,
+                code: resCode.INVALID_PARAMS,
+                message: '用户名和密码不能为空'
+            });
+        }
+
+        // 查找用户
+        const user = await staffModel.findByUsername(username);
+        console.log('登录用户信息:', user);
+
+        if (!user) {
+            return res.json({
+                code: resCode.NOT_FOUND,
                 message: '用户不存在'
             });
         }
 
-        // 用户存在，再检查密码
-        if (password !== staff.password) {
+        // 验证密码
+        if (user.password !== password) {
             return res.json({
-                code: 400,
-                data: null,
+                code: resCode.INVALID_PARAMS,
                 message: '密码错误'
             });
         }
 
-        // 登录成功，生成token
+        // 生成 token
         const token = jwt.sign(
-            { 
-                id: staff.id, 
-                username: staff.username,
-                role: staff.role,
-                city: staff.city  // 在 token 中也添加 city
+            {
+                id: user.id,
+                username: user.username,
+                role: user.role,
+                city: user.city
             },
-            SECRET_KEY,
-            { expiresIn: '30 days' }
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: '24h' }
         );
-        
-        // 登录成功后，如果需要详细信息再查询一次
-        const userInfo = await staffModel.getFullUserInfo(staff.id);
-        
-        const response = {
-            code: 200,
+
+        // 获取完整的用户信息
+        const userInfo = await staffModel.getFullUserInfo(user.city, user.id);
+
+        // 返回登录成功信息
+        res.json({
+            code: resCode.SUCCESS,
+            message: '登录成功',
             data: {
-                id: staff.id,
-                username: staff.username,
-                name: userInfo?.real_name || staff.username,
-                avatar: userInfo?.avatar_url || '',
-                role: staff.role,
-                city: staff.city,  // 添加 city 信息
-                token: token
-            },
-            message: '登录成功'
-        };
-        
-        res.json(response);
+                token,
+                userInfo
+            }
+        });
+
     } catch (error) {
-        next(error);
+        console.error('服务器错误:', error);
+        res.json(errorResponse(
+            resCode.INTERNAL_ERROR,
+            '登录失败',
+            error
+        ));
     }
 });
 

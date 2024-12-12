@@ -1,23 +1,23 @@
-const db = require('../data/db')
+const db = require('../data/dbManager')
 const TutorListQueryBuilder = require('./queries/TutorListQueryBuilder')
 const TeacherTutorListQueryBuilder = require('./queries/TeacherTutorListQueryBuilder')
 
 class TutorsModel {
   // 检查 tutor_code 是否已存在
-  static async checkTutorCodeExists(tutorCode) {
+  static async checkTutorCodeExists(city, tutorCode) {
     const sql = `
       SELECT COUNT(*) as count 
       FROM tutor_orders 
       WHERE tutor_code = ?
     `
-    const result = await db.query(sql, [tutorCode])
+    const result = await db.query(city, sql, [tutorCode])
     return result[0].count > 0
   }
 
   // 创建家教订单
-  static async create(data, staffId) {
+  static async create(city, data, staffId) {
     // 首先检查 tutor_code 是否已存在
-    const exists = await this.checkTutorCodeExists(data.tutor_code)
+    const exists = await this.checkTutorCodeExists(city, data.tutor_code)
     if (exists) {
       throw new Error('订单编号已存在')
     }
@@ -61,12 +61,12 @@ class TutorsModel {
       staffId
     ]
 
-    const result = await db.query(sql, values)
+    const result = await db.query(city, sql, values)
     return result.insertId
   }
 
   // 更新家教订单
-  static async update(id, data, staffId) {
+  static async update(city, id, data, staffId) {
     const updates = []
     const values = []
 
@@ -91,12 +91,12 @@ class TutorsModel {
       WHERE id = ? AND is_deleted = FALSE
     `
 
-    const result = await db.query(sql, values)
+    const result = await db.query(city, sql, values)
     return result.affectedRows > 0
   }
 
   // 删除家教订单
-  static async delete(id, staffId) {
+  static async delete(city, id, staffId) {
     const sql = `
       UPDATE tutor_orders 
       SET is_deleted = TRUE, 
@@ -104,13 +104,13 @@ class TutorsModel {
           deleted_at = CURRENT_TIMESTAMP
       WHERE id = ? AND is_deleted = FALSE
     `
-    const result = await db.query(sql, [staffId, id])
+    const result = await db.query(city, sql, [staffId, id])
     return result.affectedRows > 0
   }
 
   // 获取家教订单列表
-  static async getList(filters = {}, pagination = {}) {
-    const query = new TutorListQueryBuilder()
+  static async getList(city, filters = {}, pagination = {}) {
+    const query = new TutorListQueryBuilder(city)
     
     return await query
       // 添加所有筛选条件（如学生性别、年级等）
@@ -124,7 +124,7 @@ class TutorsModel {
   }
 
   // 获取单个家教订单详情
-  static async getById(idOrCode) {
+  static async getById(city, idOrCode) {
     const sql = `
         SELECT t.*, 
                c.username as created_by_name,
@@ -140,12 +140,12 @@ class TutorsModel {
         LEFT JOIN staff ds ON t.deal_staff_id = ds.id
         WHERE (t.id = ? OR t.tutor_code = ?) AND t.is_deleted = FALSE
     `
-    const rows = await db.query(sql, [idOrCode, idOrCode])
+    const rows = await db.query(city, sql, [idOrCode, idOrCode])
     return rows[0]
   }
 
   // 更新订单状态为已成交
-  static async markAsDeal(id, teacherId, staffId) {
+  static async markAsDeal(city, id, teacherId, staffId) {
     const sql = `
       UPDATE tutor_orders 
       SET status = '已成交',
@@ -155,13 +155,13 @@ class TutorsModel {
           updated_by = ?
       WHERE id = ? AND is_deleted = FALSE
     `
-    const result = await db.query(sql, [teacherId, staffId, staffId, id])
+    const result = await db.query(city, sql, [teacherId, staffId, staffId, id])
     return result.affectedRows > 0
   }
 
-  // 获取教师端家教订单列表
-  static async getTeacherList(filters = {}, pagination = {}) {
-    const queryBuilder = new TeacherTutorListQueryBuilder()
+  // 获取教师端家教订单表
+  static async getTeacherList(city, filters = {}, pagination = {}) {
+    const queryBuilder = new TeacherTutorListQueryBuilder(city)
     
     queryBuilder
       .addBasicFilters(filters)
@@ -177,7 +177,7 @@ class TutorsModel {
   }
 
   // 取消成交
-  static async markAsUnDeal(id, staffId) {
+  static async markAsUnDeal(city, id, staffId) {
     const sql = `
       UPDATE tutor_orders 
       SET status = '未成交',
@@ -187,12 +187,12 @@ class TutorsModel {
           updated_by = ?
       WHERE id = ? AND is_deleted = FALSE
     `
-    const result = await db.query(sql, [staffId, id])
+    const result = await db.query(city, sql, [staffId, id])
     return result.affectedRows > 0
   }
 
   // 在 TutorsModel 类中添加新方法
-  static async checkTeacherExists(teacherId) {
+  static async checkTeacherExists(city, teacherId) {
     try {
       if (!teacherId) return true
 
@@ -201,7 +201,7 @@ class TutorsModel {
         FROM teachers 
         WHERE id = ?
       `
-      const [result] = await db.query(sql, [teacherId])
+      const [result] = await db.query(city, sql, [teacherId])
       return result.count > 0
 
     } catch (error) {

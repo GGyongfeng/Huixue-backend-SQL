@@ -4,7 +4,7 @@ const routes = require('./routes');
 
 const app = express();
 
-// 1. 首先执行所有配置的中间件
+// 1. 配置中间件
 configureMiddleware(app);
 
 // 2. 然后是路由处理

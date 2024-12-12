@@ -86,18 +86,17 @@ router.get('/', async (req, res, next) => {
     }
 
     // console.log('步骤5: 执行数据库查询')
-    const result = await TutorsModel.getList(filters, pagination)
+    const result = await TutorsModel.getList(
+      req.city,
+      filters,
+      pagination
+    )
     
     // console.log('步骤6: 返回查询结果\n')
     res.json({
       code: resCode.SUCCESS,
       message: '获取成功',
-      data: {
-        list: result.list,
-        total: result.total,
-        page: pagination.page,
-        pageSize: pagination.pageSize
-      }
+      data: result
     })
   } catch (error) {
     next(error)

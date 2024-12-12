@@ -1,15 +1,20 @@
 require('module-alias/register');
+
+// 明确指定环境变量文件路径
+const path = require('path');
 require('dotenv').config({
-    path: `.env.${process.env.NODE_ENV || 'development'}`
+    path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV || 'development'}`)
 });
+
+console.log('Current ENV:', process.env.NODE_ENV);
+console.log('Loading config from:', path.resolve(process.cwd(), `.env.${process.env.NODE_ENV || 'development'}`));
+
 const app = require('./src/app');
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log(`服务器运行在 http://localhost:${PORT}`);
-    console.log(`管理端访问地址: http://localhost:${PORT}/manager`);
-    console.log(`教师端访问地址: http://localhost:${PORT}/teacher`);
+    console.log(`Server is running on http://localhost:${PORT}, in ${process.env.NODE_ENV || 'development'} mode`);
 });
 
 

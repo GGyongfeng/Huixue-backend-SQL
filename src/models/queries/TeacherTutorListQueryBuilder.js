@@ -1,7 +1,9 @@
-const db = require('../../data/db')
+const BaseQueryBuilder = require('./BaseQueryBuilder');
+const db = require('../../data/dbManager')
 
-class TeacherTutorListQueryBuilder {
-  constructor() {
+class TeacherTutorListQueryBuilder extends BaseQueryBuilder {
+  constructor(city) {
+    super(city);
     this.sql = `
       SELECT 
         t.id,
@@ -52,7 +54,7 @@ class TeacherTutorListQueryBuilder {
     return this
   }
 
-  // 其他筛选方法与 TutorListQueryBuilder 类似
+  // 其他选方法与 TutorListQueryBuilder 类似
   addStudentFilters(filters) {
     this.addArrayFilter('student_grade', filters.student_grade, 't.student_grade')
     this.addArrayFilter('student_gender', filters.student_gender, 't.student_gender')
@@ -145,8 +147,8 @@ class TeacherTutorListQueryBuilder {
     
     try {
       const [rows, totalResult] = await Promise.all([
-        db.query(this.sql, this.values),
-        db.query(countSql, this.values)
+        super.execute(),
+        db.query(this.city, countSql, this.values)
       ])
 
       return {
