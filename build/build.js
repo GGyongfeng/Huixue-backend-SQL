@@ -156,3 +156,21 @@ build().catch(err => {
     console.error('构建过程中发生错误:', err);
     process.exit(1);
 }); 
+
+// 读取原始 package.json
+const pkg = require('../package.json');
+
+// 修改为生产环境配置
+const prodPkg = {
+    ...pkg,
+    scripts: {
+        // 只保留生产相关的命令
+        "start": "cross-env NODE_ENV=production node index.js"
+    }
+};
+
+// 写入到 dist 目录
+fs.writeFileSync(
+    path.resolve(__dirname, '../dist/package.json'),
+    JSON.stringify(prodPkg, null, 2)
+); 

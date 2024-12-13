@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汇学教育 API 服务</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        .api-group {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .api-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #3498db;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        .method {
+            font-weight: bold;
+            color: #2ecc71;
+        }
+        .path {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <h1>汇学教育 API 服务</h1>
+    <p>欢迎访问 api.guyongfeng.cn，这是汇学教育系统的 API 服务器。</p>
+
+    <h2>API 服务概览</h2>
+    <div class="api-group">
+        <h3>管理端接口</h3>
+        <div class="api-item">
+            <p><span class="method">POST</span> <code class="path">/api/manager/users/login</code> - 管理员登录</p>
+            <p><span class="method">GET</span> <code class="path">/api/manager/menu/list</code> - 获取菜单列表</p>
+            <p><span class="method">GET</span> <code class="path">/api/manager/tutors/list</code> - 获取家教订单列表</p>
+            <p><span class="method">POST</span> <code class="path">/api/manager/tutors/create</code> - 创建家教订单</p>
+            <p><span class="method">PUT</span> <code class="path">/api/manager/tutors/update/:id</code> - 更新家教订单</p>
+            <p><span class="method">POST</span> <code class="path">/api/manager/tutors/delete</code> - 删除家教订单</p>
+        </div>
+
+        <h3>教师端接口</h3>
+        <div class="api-item">
+            <p><span class="method">GET</span> <code class="path">/api/teacher/tutorslist</code> - 获取可接订单列表</p>
+            <p><span class="method">GET</span> <code class="path">/api/teacher/profile</code> - 获取教师信息</p>
+            <p><span class="method">GET</span> <code class="path">/api/teacher/tutornotice</code> - 获取系统通知</p>
+        </div>
+    </div>
+
+    <h2>技术特点</h2>
+    <ul>
+        <li>基于 Express.js 框架开发</li>
+        <li>支持多城市数据库独立部署</li>
+        <li>JWT 认证保护</li>
+        <li>完整的错误处理机制</li>
+        <li>支持跨域请求</li>
+    </ul>
+
+    <h2>联系方式</h2>
+    <p>如有问题，请联系：</p>
+    <ul>
+        <li>邮箱：yongfengu@tju.edu.cn</li>
+        <li>网站：<a href="http://www.guyongfeng.cn">www.guyongfeng.cn</a></li>
+    </ul>
+
+    <footer style="margin-top: 50px; text-align: center; color: #666;">
+        <p>© 2024 汇学教育. All rights reserved.</p>
+    </footer>
+</body>
+</html> 
