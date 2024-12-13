@@ -27,7 +27,7 @@ class TutorsModel {
     const processedSubjects = data.subjects.map(subject => 
       validSubjects.includes(subject) ? subject : '其他'
     );
-    // 去重，避免多个"其他"
+    // 去���，避免多个"其他"
     const uniqueSubjects = [...new Set(processedSubjects)];
 
     const sql = `
@@ -45,9 +45,9 @@ class TutorsModel {
       data.teaching_type,
       data.student_grade,
       uniqueSubjects.join(','),
-      data.teacher_type || null,
-      data.teacher_gender || null,
-      data.order_tags ? data.order_tags.join(',') : null,
+      Array.isArray(data.teacher_type) ? (data.teacher_type.length > 0 ? data.teacher_type[0] : null) : data.teacher_type,
+      Array.isArray(data.teacher_gender) ? (data.teacher_gender.length > 0 ? data.teacher_gender[0] : null) : data.teacher_gender,
+      Array.isArray(data.order_tags) && data.order_tags.length === 0 ? null : data.order_tags.join(','),
       data.district,
       data.city || '天津',
       data.address,
@@ -95,17 +95,20 @@ class TutorsModel {
     return result.affectedRows > 0
   }
 
-  // 删除家教订单
+  // 删除家教订单 - 真实删除
   static async delete(city, id, staffId) {
     const sql = `
-      UPDATE tutor_orders 
-      SET is_deleted = TRUE, 
-          deleted_by = ?, 
-          deleted_at = CURRENT_TIMESTAMP
-      WHERE id = ? AND is_deleted = FALSE
-    `
-    const result = await db.query(city, sql, [staffId, id])
-    return result.affectedRows > 0
+        DELETE FROM tutor_orders 
+        WHERE id = ?
+    `;
+    
+    try {
+        const result = await db.query(city, sql, [id]);
+        return result.affectedRows > 0;
+    } catch (error) {
+        console.error('删除订单失败:', error);
+        throw error;
+    }
   }
 
   // 获取家教订单列表
@@ -148,7 +151,7 @@ class TutorsModel {
   static async markAsDeal(city, id, teacherId, staffId) {
     const sql = `
       UPDATE tutor_orders 
-      SET status = '已成交',
+      SET status = '已��交',
           deal_time = CURRENT_TIMESTAMP,
           deal_teacher_id = ?,
           deal_staff_id = ?,
@@ -207,6 +210,81 @@ class TutorsModel {
     } catch (error) {
       console.error('检查教师是否存在时发生错误:', error)
       throw new Error('检查教师失败')
+    }
+  }
+
+  // 批量更新订单可见状态
+  static async updateVisibility(city, ids, isVisible) {
+    const sql = `
+        UPDATE tutor_orders 
+        SET is_visible = ?
+        WHERE id IN (${ids.map(() => '?').join(',')})
+    `
+    
+    try {
+        const result = await db.query(city, sql, [isVisible, ...ids])
+        return result.affectedRows > 0
+    } catch (error) {
+        console.error('批量更新可见状态失败:', error)
+        throw error
+    }
+  }
+
+  // 批量更新订单为已成交
+  static async batchMarkAsDeal(city, ids, teacherId, staffId) {
+    const sql = `
+        UPDATE tutor_orders 
+        SET status = '已成交',
+            deal_time = CURRENT_TIMESTAMP,
+            deal_teacher_id = ?,
+            deal_staff_id = ?,
+            updated_by = ?
+        WHERE id IN (${ids.map(() => '?').join(',')})
+        AND is_deleted = FALSE
+    `
+    try {
+        const result = await db.query(city, sql, [teacherId, staffId, staffId, ...ids])
+        return result.affectedRows > 0
+    } catch (error) {
+        console.error('批量更新成交状态失败:', error)
+        throw error
+    }
+  }
+
+  // 批量更新订单为未成交
+  static async batchMarkAsUnDeal(city, ids, staffId) {
+    const sql = `
+        UPDATE tutor_orders 
+        SET status = '未成交',
+            deal_time = NULL,
+            deal_teacher_id = NULL,
+            deal_staff_id = NULL,
+            updated_by = ?
+        WHERE id IN (${ids.map(() => '?').join(',')})
+        AND is_deleted = FALSE
+    `
+    try {
+        const result = await db.query(city, sql, [staffId, ...ids])
+        return result.affectedRows > 0
+    } catch (error) {
+        console.error('批量取消成交状态失败:', error)
+        throw error
+    }
+  }
+
+  // 批量删除家教订单
+  static async batchDelete(city, ids) {
+    const sql = `
+        DELETE FROM tutor_orders 
+        WHERE id IN (${ids.map(() => '?').join(',')})
+    `
+    
+    try {
+        const result = await db.query(city, sql, ids)
+        return result.affectedRows > 0
+    } catch (error) {
+        console.error('批量删除订单失败:', error)
+        throw error
     }
   }
 }

@@ -4,18 +4,20 @@ const TutorsModel = require('@/models/tutorsModel')
 const resCode = require('@/constants/resCode')
 const { errorResponse } = require('@/utils/errorHandler')
 
-router.put('/:id', async (req, res, next) => {
+router.put('/', async (req, res, next) => {
   try {
     console.log('=== 开始处理订单状态更新 ===')
-    console.log('请求参数:', {
-      id: req.params.id,
-      body: req.body
+    const { ids, teacherId = null, status = '已成交' } = req.body
+    const staffId = req.user?.id || 1
+    const city = req.city
+    
+    console.log('请求数据:', {
+      ids,
+      teacherId,
+      status,
+      staffId
     })
 
-    const { id } = req.params
-    const { teacherId = null, status = '已成交' } = req.body
-    const staffId = req.user?.id || 1
-    
     // 验证 staffId
     if (!staffId) {
       throw errorResponse(
@@ -27,7 +29,7 @@ router.put('/:id', async (req, res, next) => {
     // 如果指定了教师ID，验证教师是否存在
     if (teacherId) {
       try {
-        const teacherExists = await TutorsModel.checkTeacherExists(teacherId)
+        const teacherExists = await TutorsModel.checkTeacherExists(city, teacherId)
         if (!teacherExists) {
           return res.json({
             code: resCode.DATA_NOT_FOUND,
@@ -43,16 +45,16 @@ router.put('/:id', async (req, res, next) => {
     }
 
     // 根据状态选择不同的处理方法
-    let result
+    let success
     if (status === '已成交') {
-      result = await TutorsModel.markAsDeal(id, teacherId, staffId)
+      success = await TutorsModel.batchMarkAsDeal(city, ids, teacherId, staffId)
     } else {
-      result = await TutorsModel.markAsUnDeal(id, staffId)
+      success = await TutorsModel.batchMarkAsUnDeal(city, ids, staffId)
     }
     
-    console.log('Model 更新结果:', result)
+    console.log('批量更新结果:', success)
 
-    if (!result) {
+    if (!success) {
       throw errorResponse(
         resCode.OPERATION_FAILED,
         '更新失败'
@@ -61,11 +63,11 @@ router.put('/:id', async (req, res, next) => {
 
     res.json({
       code: resCode.SUCCESS,
-      message: status === '已成交' ? '订单已成交' : '已取消成交'
+      message: `批量${status === '已成交' ? '成交' : '取消成交'}成功`
     })
 
   } catch (error) {
-    // 关键：使用 next() 传递错误
+    console.error('更新状态失败:', error)
     if (error.code) {
       next(error)
     } else {
@@ -75,8 +77,6 @@ router.put('/:id', async (req, res, next) => {
         error
       ))
     }
-  } finally {
-    console.log('=== 订单状态更新处理结束 ===')
   }
 })
 

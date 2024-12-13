@@ -70,6 +70,7 @@ const deleteRouter = require('./delete')
 const listRouter = require('./list')
 const detailRouter = require('./detail')
 const dealRouter = require('./deal')
+const statusRouter = require('./status')
 
 // 注册子路由
 router.use('/create', createRouter)
@@ -78,5 +79,6 @@ router.use('/delete', deleteRouter)
 router.use('/list', listRouter)
 router.use('/detail', detailRouter)
 router.use('/deal', dealRouter)
+router.use('/status', statusRouter)
 
 module.exports = router 
