@@ -151,7 +151,7 @@ class TutorsModel {
   static async markAsDeal(city, id, teacherId, staffId) {
     const sql = `
       UPDATE tutor_orders 
-      SET status = '已��交',
+      SET status = '已成交',
           deal_time = CURRENT_TIMESTAMP,
           deal_teacher_id = ?,
           deal_staff_id = ?,

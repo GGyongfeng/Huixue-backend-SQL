@@ -14,6 +14,7 @@ class TeacherTutorListQueryBuilder extends BaseQueryBuilder {
         t.subjects,
         t.teacher_type,
         t.teacher_gender,
+        t.subjects_desc,
         t.order_tags,
         t.district,
         t.city,
