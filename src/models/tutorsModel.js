@@ -27,17 +27,17 @@ class TutorsModel {
     const processedSubjects = data.subjects.map(subject => 
       validSubjects.includes(subject) ? subject : '其他'
     );
-    // 去���，避免多个"其他"
+    // 去重，避免多个"其他"
     const uniqueSubjects = [...new Set(processedSubjects)];
 
     const sql = `
       INSERT INTO tutor_orders (
         tutor_code, student_gender, teaching_type, student_grade,
-        subjects, teacher_type, teacher_gender, order_tags,
+        subjects, subjects_desc, teacher_type, teacher_gender, order_tags,
         district, city, address, grade_score, student_level,
         tutoring_time, salary, requirement_desc, phone_number, 
         order_source, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
     const values = [
       data.tutor_code,
@@ -45,6 +45,7 @@ class TutorsModel {
       data.teaching_type,
       data.student_grade,
       uniqueSubjects.join(','),
+      data.subjects_desc,
       Array.isArray(data.teacher_type) ? (data.teacher_type.length > 0 ? data.teacher_type[0] : null) : data.teacher_type,
       Array.isArray(data.teacher_gender) ? (data.teacher_gender.length > 0 ? data.teacher_gender[0] : null) : data.teacher_gender,
       Array.isArray(data.order_tags) && data.order_tags.length === 0 ? null : data.order_tags.join(','),
@@ -75,6 +76,9 @@ class TutorsModel {
         if (key === 'subjects' || key === 'order_tags') {
           updates.push(`${key} = ?`)
           values.push(Array.isArray(value) ? value.join(',') : value)
+        } else if (key === 'subjects_desc') {
+          updates.push(`${key} = ?`)
+          values.push(value)
         } else {
           updates.push(`${key} = ?`)
           values.push(value)

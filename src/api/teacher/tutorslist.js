@@ -3,6 +3,7 @@ const router = express.Router()
 const TutorsModel = require('@models/tutorsModel')
 const resCode = require('@constants/resCode')
 const { errorResponse } = require('@/utils/errorHandler')
+const { validateFilterValue } = require('@types/filters')
 
 /**
  * 获取家教列表
@@ -53,25 +54,86 @@ const { errorResponse } = require('@/utils/errorHandler')
 
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, pageSize = 20 } = req.query;
-    const city = req.city;  // 从请求对象获取城市信息
-    console.log('Using city:', city);  // 调试日志
+    const { 
+      page = 1, 
+      pageSize = 20,
+      keyword,
+      district,
+      student_grade,
+      student_gender,
+      teacher_gender,
+      teacher_type,
+      subjects,
+      teaching_type,
+      order_tags
+    } = req.query;
+    
+    const city = req.city;
+    console.log('Using city:', city);
 
-    const result = await TutorsModel.getTeacherList(city, {
-      // filters
-    }, {
-      page,
-      pageSize
+    // 处理筛选参数
+    const processArrayParam = (param) => {
+      if (!param) return undefined
+      return Array.isArray(param) ? param : [param]
+    }
+
+    const filters = {
+      district: processArrayParam(district),
+      student_grade: processArrayParam(student_grade),
+      student_gender: processArrayParam(student_gender),
+      teacher_gender: processArrayParam(teacher_gender),
+      teacher_type: processArrayParam(teacher_type),
+      subjects: processArrayParam(subjects),
+      teaching_type: processArrayParam(teaching_type),
+      order_tags: processArrayParam(order_tags)
+    }
+
+    // 添加关键词搜索
+    if (keyword) {
+      filters.keyword = keyword
+    }
+
+    // 验证筛选条件
+    const fieldsToValidate = [
+      'student_gender',
+      'teaching_type',
+      'student_grade',
+      'teacher_type',
+      'teacher_gender',
+      'district',
+      'subjects'
+    ]
+
+    // 验证筛选值
+    fieldsToValidate.forEach(field => {
+      if (filters[field]) {
+        // 对于 district 字段，需要传入城市参数进行验证
+        if (field === 'district') {
+          if (!validateFilterValue(field, filters[field], city)) {
+            throw new Error(`无效的筛选条件: ${field}`)
+          }
+        } else {
+          // 其他字段的验证保持不变
+          if (!validateFilterValue(field, filters[field])) {
+            throw new Error(`无效的筛选条件: ${field}`)
+          }
+        }
+      }
+    })
+
+    const result = await TutorsModel.getTeacherList(city, filters, {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize)
     });
 
     res.json({
-      code: 200,
+      code: resCode.SUCCESS,
       data: result
     });
   } catch (error) {
     console.error('Error in tutorslist:', error);
-    res.status(500).json({
-      code: 500,
+    res.json({
+      code: resCode.INVALID_PARAMS,
       message: error.message
     });
   }

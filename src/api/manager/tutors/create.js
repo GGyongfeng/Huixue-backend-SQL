@@ -9,6 +9,29 @@ router.post('/', async (req, res) => {
     const staffId = req.user.id
     const city = req.city
 
+    // 在允许创建的字段列表中添加 subjects_desc
+    const allowedFields = [
+      'tutor_code',
+      'student_gender',
+      'teaching_type',
+      'student_grade',
+      'subjects',
+      'subjects_desc',
+      'teacher_type',
+      'teacher_gender',
+      'order_tags',
+      'district',
+      'city',
+      'address',
+      'grade_score',
+      'student_level',
+      'tutoring_time',
+      'salary',
+      'requirement_desc',
+      'phone_number',
+      'order_source'
+    ]
+
     // 创建订单
     const orderId = await TutorsModel.create(city, data, staffId)
     

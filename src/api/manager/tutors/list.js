@@ -38,7 +38,7 @@ router.get('/', async (req, res, next) => {
       district: processArrayParam(district),
       is_deleted: false,
       student_grade: processArrayParam(student_grade),
-      student_gendern: processArrayParam(student_gender),
+      student_gender: processArrayParam(student_gender),
       teacher_gender: processArrayParam(teacher_gender),
       teacher_type: processArrayParam(teacher_type),
       subjects: processArrayParam(subjects),
@@ -71,11 +71,24 @@ router.get('/', async (req, res, next) => {
 
     // 只验证指定的字段
     fieldsToValidate.forEach(field => {
-      if (filters[field] && !validateFilterValue(field, filters[field])) {
-        throw errorResponse(
-          resCode.INVALID_PARAMS,
-          `无效的筛选条件: ${field}`
-        )
+      if (filters[field]) {
+        // 对于 district 字段，需要传入城市参数进行验证
+        if (field === 'district') {
+          if (!validateFilterValue(field, filters[field], req.city)) {
+            throw errorResponse(
+              resCode.INVALID_PARAMS,
+              `无效的筛选条件: ${field}`
+            )
+          }
+        } else {
+          // 其他字段的验证保持不变
+          if (!validateFilterValue(field, filters[field])) {
+            throw errorResponse(
+              resCode.INVALID_PARAMS,
+              `无效的筛选条件: ${field}`
+            )
+          }
+        }
       }
     })
 

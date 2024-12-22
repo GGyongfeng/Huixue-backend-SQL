@@ -5,6 +5,13 @@
  * @property {string[]} options - 可选值列表
  */
 
+// 定义不同城市的区域选项
+const CITY_DISTRICTS = {
+  '天津': ['南开区', '和平区', '河西区', '河东区', '河北区', '红桥区', '津南区', '滨海新区', '线上', '其他'],
+  '北京': ['东城区', '西城区', '朝阳区', '海淀区', '丰台区', '石景山区', '通州区', '线上', '其他'],
+  // 可以继续添加其他城市的区域
+}
+
 /** @type {FilterOption[]} */
 const TUTOR_FILTERS = [
   {
@@ -34,7 +41,7 @@ const TUTOR_FILTERS = [
   {
     field: 'student_grade',
     label: '学生年级',
-    options: ['幼儿', '小学', '初一', '初二', '初三', '高一', '高二', '高三', '其他']
+    options: ['幼儿', '小学', '初一', '初二', '初三', '高一', '高二', '高三', '成人', '其他']
   },
   {
     field: 'subjects',
@@ -56,17 +63,18 @@ const TUTOR_FILTERS = [
   {
     field: 'teacher_type',
     label: '教师类型',
-    options: ['在职老师', '985学生', '无']
+    options: ['在职老师', '985学生']
   },
   {
     field: 'teacher_gender',
     label: '教师性别',
-    options: ['男', '女', '无']
+    options: ['男', '女']
   },
   {
     field: 'district',
     label: '区域',
-    options: ['南开区', '和平区', '河西区', '河东区', '河北区', '红桥区', '津南区', '滨海新区']
+    options: [], // 初始为空，将通过函数动态获取
+    getCityOptions: (city) => CITY_DISTRICTS[city] || ['其他'] // 添加获取城市区域的方法
   },
   {
     field: 'student_level',
@@ -94,9 +102,16 @@ const FILTER_FIELDS = TUTOR_FILTERS.map(filter => filter.field)
  * @param {string} fieldName 字段名
  * @returns {string[]} 选项数组
  */
-const getFilterOptions = (fieldName) => {
+const getFilterOptions = (fieldName, city) => {
   const filter = TUTOR_FILTERS.find(f => f.field === fieldName)
-  return filter?.options || []
+  if (!filter) return []
+  
+  // 如果是区域字段且提供了城市参数，返回该城市的区域选项
+  if (fieldName === 'district' && city) {
+    return filter.getCityOptions(city)
+  }
+  
+  return filter.options || []
 }
 
 /**
@@ -105,11 +120,18 @@ const getFilterOptions = (fieldName) => {
  * @param {string|string[]} value 筛选值
  * @returns {boolean} 是否合法
  */
-const validateFilterValue = (field, value) => {
+const validateFilterValue = (field, value, city) => {
   const filter = TUTOR_FILTERS.find(f => f.field === field)
   if (!filter) return false
   
   const values = Array.isArray(value) ? value : [value]
+  
+  // 如果是区域字段，使用对应城市的选项进行验证
+  if (field === 'district') {
+    const validOptions = getFilterOptions(field, city)
+    return values.every(v => validOptions.includes(v))
+  }
+  
   return values.every(v => filter.options.includes(v))
 }
 
@@ -127,5 +149,6 @@ module.exports = {
   FILTER_FIELDS,
   getFilterOptions,
   validateFilterValue,
-  convertBooleanValue
+  convertBooleanValue,
+  CITY_DISTRICTS  // 导出城市区域配置
 } 

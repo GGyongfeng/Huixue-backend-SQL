@@ -57,7 +57,7 @@ class TutorListQueryBuilder extends BaseQueryBuilder {
           // 例如：FIND_IN_SET('数学', t.subjects) OR FIND_IN_SET('英语', t.subjects)
           this.sql += filters[field].map(() => `FIND_IN_SET(?, t.${field})`).join(' OR ')
           this.sql += `)`
-          // 添加参数值到查询参数数��
+          // 添加参数值到查询参数数组
           this.values.push(...filters[field])
         } else if (type === 'boolean') {
           // 处理布尔类型字段
