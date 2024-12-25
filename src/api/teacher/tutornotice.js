@@ -8,7 +8,6 @@ const resCode = require('@/constants/resCode')
  */
 router.get('/', async (req, res) => {
     try {
-        console.log('Getting notice for city:', req.city);
         const notice = await TutorNoticeModel.getLatestNotice(req.city);
         
         if (notice) {
@@ -28,7 +27,6 @@ router.get('/', async (req, res) => {
             });
         }
     } catch (error) {
-        console.error('获取通知失败:', error);
         res.json({
             code: resCode.INTERNAL_ERROR,
             message: '获取通知失败',

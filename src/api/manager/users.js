@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
                 city: user.city
             },
             process.env.JWT_SECRET_KEY,
-            { expiresIn: '24h' }
+            { expiresIn: '15d' }
         );
 
         // 获取完整的用户信息

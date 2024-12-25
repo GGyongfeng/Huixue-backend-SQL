@@ -9,60 +9,51 @@ const resCode = require('@/constants/resCode')
  */
 router.put('/', async (req, res) => {
     try {
-        const { id, title, description } = req.body
-        const staffId = 1
-        console.log('staffId', staffId)
-        console.log('req.body', req.body)
+        const { id, title, description } = req.body;
+        const city = req.city;
+        const staffId = req.user?.id || 1;
 
-        // 如果没有提供id，获取最新的一条通知
-        let noticeId = id
+        let noticeId = id;
         if (!noticeId) {
-            const latestNotice = await TutorNoticeModel.getLatestNotice()
-            if (!latestNotice || latestNotice.length === 0) {
+            const latestNotice = await TutorNoticeModel.getLatestNotice(city);
+            
+            if (!latestNotice) {
+                const success = await TutorNoticeModel.create(city, {
+                    title,
+                    description
+                }, staffId);
+
                 return res.json({
-                    code: resCode.NOT_FOUND,
-                    message: '没有可更新的通知'
-                })
+                    code: success ? resCode.SUCCESS : resCode.INTERNAL_ERROR,
+                    message: success ? '创建成功' : '创建失败'
+                });
             }
-            noticeId = latestNotice.id
+            noticeId = latestNotice.id;
         }
 
-        // 检查通知是否存在
-        console.log('准备检查通知:', noticeId)
-        const notice = await TutorNoticeModel.getById(noticeId)
-        console.log('检查通知结果:', notice)
-        if (!notice) {
-            return res.json({
-                code: resCode.NOT_FOUND,
-                message: '通知不存在或已被删除'
-            })
-        }
-
-        // 更新通知
-        const success = await TutorNoticeModel.update(noticeId, {
+        const success = await TutorNoticeModel.update(city, noticeId, {
             title,
             description
-        }, staffId)
+        }, staffId);
 
         if (success) {
             res.json({
                 code: resCode.SUCCESS,
                 message: '更新成功'
-            })
+            });
         } else {
             res.json({
                 code: resCode.INTERNAL_ERROR,
                 message: '更新失败'
-            })
+            });
         }
     } catch (error) {
-        console.error('更新通知失败:', error)
         res.json({
             code: resCode.INTERNAL_ERROR,
             message: '更新通知失败',
             error: error.message
-        })
+        });
     }
-})
+});
 
 module.exports = router 

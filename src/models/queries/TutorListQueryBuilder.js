@@ -15,10 +15,10 @@ class TutorListQueryBuilder extends BaseQueryBuilder {
     super(city);
     this.sql = `
       SELECT t.*, 
-             c.username as created_by_name,
-             u.username as updated_by_name,
-             d.username as deleted_by_name,
-             ds.username as deal_staff_name
+             c.realname as created_by_name,
+             u.realname as updated_by_name,
+             d.realname as deleted_by_name,
+             ds.realname as deal_staff_name
       FROM tutor_orders t
       LEFT JOIN staff c ON t.created_by = c.id
       LEFT JOIN staff u ON t.updated_by = u.id

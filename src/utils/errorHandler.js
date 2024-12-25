@@ -1,27 +1,28 @@
-const resCode = require('@/constants/resCode')
+/**
+ * 统一的错误响应格式
+ */
+function errorResponse(code, message, error = null) {
+    const err = new Error(message);
+    err.code = code;
+    err.originalError = error;
+    return err;
+}
 
 /**
- * 统一错误响应生成器
- * @param {number} code 错误码
- * @param {string} message 错误信息
- * @param {Error} [error] 原始错误对象（可选）
+ * 错误处理中间件
  */
-const errorResponse = (code, message, error = null) => {
-  // 创建一个自定义错误对象
-  const customError = new Error(message)
-  customError.code = code
-  console.log('errorHandler - 错误码:', customError.code)
-  console.log('errorHandler - 错误信息:', customError.message)
-
-  // 如果传入了原始错误，保存它
-  if (error) {
-    customError.originalError = error
-    console.error('原始错误:', error)
-  }
-  
-  return customError
+function errorHandler(err, req, res, next) {
+    console.error('服务器错误:', err);
+    
+    // 始终使用 200 作为 HTTP 状态码，在响应体中包含业务错误码
+    res.json({
+        code: err.code || 500,
+        message: err.message || '服务器内部错误',
+        error: err.originalError?.message
+    });
 }
 
 module.exports = {
-  errorResponse
-} 
+    errorResponse,
+    errorHandler
+}; 

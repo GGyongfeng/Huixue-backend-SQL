@@ -10,6 +10,7 @@ const CITY_NAME_MAP = {
     'wh': '武汉'
 };
 
+
 function cityResolver(req, res, next) {
     let city = req.headers['x-city'];  // 从请求头获取
 

@@ -7,12 +7,6 @@ const { validateFilterValue } = require('@types/filters')
 
 router.put('/', async (req, res, next) => {
   try {
-    console.log('=== 开始处理订单更新 ===')
-    console.log('请求参数:', {
-      id: req.body.id,
-      body: req.body
-    })
-
     const { id } = req.body
     const staffId = req.user?.id || 1
     const { city } = req
@@ -139,7 +133,6 @@ router.put('/', async (req, res, next) => {
     })
 
   } catch (error) {
-    console.error('订单更新失败:', error)
     if (error.code) {
       next(error)
     } else {

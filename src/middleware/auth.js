@@ -2,9 +2,9 @@ const jwt = require('jsonwebtoken');
 const { CITY_CODES } = require('../data/dbManager');
 
 const authMiddleware = async (req, res, next) => {
-    console.log('\n=== Auth Middleware Start ===');
-    console.log('Request Path:', req.path);
-    console.log('Authorization Header:', req.headers.authorization ? 'Present' : 'Missing');
+    // console.log('\n=== Auth Middleware Start ===');
+    // console.log('Request Path:', req.path);
+    // console.log('Authorization Header:', req.headers.authorization ? 'Present' : 'Missing');
     
     try {
         // 从请求头获取 token
@@ -18,13 +18,13 @@ const authMiddleware = async (req, res, next) => {
         }
 
         // 验证 token
-        console.log('Verifying token...');
+        // console.log('Verifying token...');
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        console.log('Token decoded:', {
-            username: decoded.username,
-            role: decoded.role,
-            city: decoded.city
-        });
+        // console.log('Token decoded:', {
+        //     username: decoded.username,
+        //     role: decoded.role,
+        //     city: decoded.city
+        // });
         
         // 获取用户信息
         let city = decoded.city || '天津';  // 从 token 中获取城市，默认天津
@@ -40,7 +40,7 @@ const authMiddleware = async (req, res, next) => {
                 city = cityName;
             }
         }
-        console.log('Resolved city:', city);
+        // console.log('Resolved city:', city);
 
         // 直接使用 token 中的信息
         req.user = {
@@ -51,13 +51,13 @@ const authMiddleware = async (req, res, next) => {
         };
         req.city = city;
 
-        console.log('Auth successful, added to request:', {
-            city: req.city,
-            userId: req.user.id,
-            role: req.user.role
-        });
+        // console.log('Auth successful, added to request:', {
+        //     city: req.city,
+        //     userId: req.user.id,
+        //     role: req.user.role
+        // });
 
-        console.log('=== Auth Middleware End ===\n');
+        // console.log('=== Auth Middleware End ===\n');
         next();
     } catch (error) {
         console.error('Auth Error:', {
