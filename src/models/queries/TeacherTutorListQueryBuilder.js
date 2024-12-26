@@ -23,8 +23,13 @@ class TeacherTutorListQueryBuilder extends BaseQueryBuilder {
         t.student_level,
         t.tutoring_time,
         t.salary,
-        t.requirement_desc
+        t.requirement_desc,
+        t.original_text,
+        c.realname as created_by_name,
+        u.realname as updated_by_name
       FROM tutor_orders t
+      LEFT JOIN staff c ON t.created_by = c.id
+      LEFT JOIN staff u ON t.updated_by = u.id
       WHERE 1=1
     `
     this.values = []
