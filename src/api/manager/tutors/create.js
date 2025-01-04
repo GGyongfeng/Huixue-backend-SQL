@@ -9,6 +9,8 @@ router.post('/', async (req, res) => {
     const staffId = req.user.id
     const city = req.city
 
+    console.log(data)
+
     // 在允许创建的字段列表中添加 subjects_desc
     const allowedFields = [
       'tutor_code',
@@ -29,7 +31,8 @@ router.post('/', async (req, res) => {
       'salary',
       'requirement_desc',
       'phone_number',
-      'order_source'
+      'order_source',
+      'original_text'
     ]
 
     // 创建订单

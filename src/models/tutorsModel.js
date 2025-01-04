@@ -36,8 +36,8 @@ class TutorsModel {
         subjects, subjects_desc, teacher_type, teacher_gender, order_tags,
         district, city, address, grade_score, student_level,
         tutoring_time, salary, requirement_desc, phone_number, 
-        order_source, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        order_source, created_by, original_text
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
     const values = [
       data.tutor_code,
@@ -59,7 +59,8 @@ class TutorsModel {
       data.requirement_desc,
       data.phone_number || null,
       data.order_source || null,
-      staffId
+      staffId,
+      data.original_text
     ]
 
     const result = await db.query(city, sql, values)
