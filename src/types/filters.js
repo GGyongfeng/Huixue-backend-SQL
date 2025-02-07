@@ -98,6 +98,7 @@ const CITY_DISTRICTS = {
     '六合区',
     '溧水区',
     '高淳区',
+    '江北新区',
     '线上',
     '其他'
   ],
@@ -193,8 +194,8 @@ const TUTOR_FILTERS = [
   {
     field: 'is_visible',
     label: '可见状态',
-    options: ['是', '否'],
-    type: 'boolean'
+    options: ['隐藏', '可见'],
+    validate: (value) => ['隐藏', '可见'].includes(value)
   },
   {
     field: 'status',

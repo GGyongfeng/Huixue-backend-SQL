@@ -45,8 +45,8 @@ class TutorListQueryBuilder extends BaseQueryBuilder {
     TUTOR_FILTERS.forEach(filter => {
       const { field, type } = filter
 
-      // 检查该字段是否有值且不为空数组
-      if (filters[field] && filters[field].length > 0) {
+      // 检查该字段是否有值且不为空数组，且不是 is_visible
+      if (filters[field] && filters[field].length > 0 && field !== 'is_visible') {
         
         // 处理特殊字段：subjects 和 order_tags
         // 这些字段在数据库中以逗号分隔的字符串存储，如："数学,英语"
@@ -84,6 +84,24 @@ class TutorListQueryBuilder extends BaseQueryBuilder {
         }
       }
     })
+
+    if (filters.is_visible) {
+      const visibilityMap = {
+        '隐藏': 0,
+        '可见': 1
+      }
+      const values = filters.is_visible.map(v => visibilityMap[v])
+      this.sql += ` AND t.is_visible IN (${values.map(() => '?').join(',')})`
+      this.values.push(...values)
+    }
+
+    // 添加时间范围筛选
+    if (filters.created_at && filters.created_at.length === 2) {
+      const [startTime, endTime] = filters.created_at
+      this.sql += ` AND t.created_at BETWEEN ? AND ?`
+      this.values.push(startTime, endTime)
+    }
+
     // 返回 this 以支持链式调用
     return this
   }

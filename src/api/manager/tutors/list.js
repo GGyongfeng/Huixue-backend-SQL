@@ -24,7 +24,8 @@ router.get('/', async (req, res, next) => {
       city,
       order_tags,
       student_level,
-      is_visible
+      is_visible,
+      created_at
     } = req.query
 
     // console.log('步骤1: 处理筛选条件')
@@ -46,8 +47,11 @@ router.get('/', async (req, res, next) => {
       city: processArrayParam(city),
       order_tags: processArrayParam(order_tags),
       student_level: processArrayParam(student_level),
-      is_visible: processArrayParam(is_visible)
+      is_visible: processArrayParam(is_visible),
+      created_at: processArrayParam(created_at)
     }
+
+    console.log('filters: ', filters)
 
     // 处理关键词
     if (keyword) {
@@ -66,7 +70,8 @@ router.get('/', async (req, res, next) => {
       'district',
       'student_level',
       'status',
-      'subjects'
+      'subjects',
+      'is_visible'
     ]
 
     // 只验证指定的字段

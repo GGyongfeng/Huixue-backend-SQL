@@ -35,64 +35,10 @@ function generateDeployFiles() {
   }]
 }`;
 
-    // 复制 start.sh
-    fs.copyFileSync(
-        path.join(__dirname, 'start.sh'),
-        path.join(BUILD_DIR, 'start.sh')
-    );
-
-    // 复制 nginx 配置文件
-    fs.copyFileSync(
-        path.join(__dirname, 'nginx.guyongfeng.conf'),
-        path.join(BUILD_DIR, 'nginx.guyongfeng.conf')
-    );
-
     // 写入 ecosystem.config.js
     fs.writeFileSync(path.join(BUILD_DIR, 'ecosystem.config.js'), ecosystemContent);
 
-    // 创建前端文件目录
-    const managerDir = path.join(BUILD_DIR, 'public/client/manager');
-    const teacherDir = path.join(BUILD_DIR, 'public/client/teacher');
-    
-    fs.mkdirSync(managerDir, { recursive: true });
-    fs.mkdirSync(teacherDir, { recursive: true });
-
-    // 修改：从 public/client 目录复制前端构建文件
-    copyDir(
-        path.resolve(__dirname, '../public/client/manager'),
-        managerDir
-    );
-    copyDir(
-        path.resolve(__dirname, '../public/client/teacher'),
-        teacherDir
-    );
-
     console.log('生成部署文件完成');
-}
-
-// 添加目录复制函数
-function copyDir(src, dest) {
-    if (!fs.existsSync(src)) {
-        console.warn(`警告: 目录不存在 ${src}`);
-        return;
-    }
-
-    if (!fs.existsSync(dest)) {
-        fs.mkdirSync(dest, { recursive: true });
-    }
-
-    const files = fs.readdirSync(src);
-    for (const file of files) {
-        const srcPath = path.join(src, file);
-        const destPath = path.join(dest, file);
-        
-        const stat = fs.statSync(srcPath);
-        if (stat.isDirectory()) {
-            copyDir(srcPath, destPath);
-        } else {
-            fs.copyFileSync(srcPath, destPath);
-        }
-    }
 }
 
 // 复制并压缩文件函数
@@ -109,8 +55,15 @@ async function copyAndMinifyFile(src, dest) {
     if (src.endsWith('.js')) {
         try {
             const minified = await minify(content, {
-                compress: true,
-                mangle: true
+                compress: {
+                    drop_console: true,  // 删除 console.* 调用
+                    drop_debugger: true, // 删除 debugger 语句
+                    pure_funcs: ['console.log', 'console.info', 'console.debug'], // 删除特定的函数调用
+                },
+                mangle: true,
+                output: {
+                    comments: false  // 删除所有注释
+                }
             });
             fs.writeFileSync(dest, minified.code);
             console.log(`压缩并复制: ${src} -> ${dest}`);
