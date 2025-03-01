@@ -292,6 +292,27 @@ class TutorsModel {
         throw error
     }
   }
+
+  // 获取多个家教订单详情
+  static async getDetailsByOrderCodes(city, orderCodes) {
+    const sql = `
+        SELECT t.*, 
+               c.realname as created_by_name,
+               u.realname as updated_by_name,
+               d.realname as deleted_by_name,
+               dt.name as deal_teacher_name,
+               ds.realname as deal_staff_name
+        FROM tutor_orders t
+        LEFT JOIN staff c ON t.created_by = c.id
+        LEFT JOIN staff u ON t.updated_by = u.id
+        LEFT JOIN staff d ON t.deleted_by = d.id
+        LEFT JOIN teachers dt ON t.deal_teacher_id = dt.id
+        LEFT JOIN staff ds ON t.deal_staff_id = ds.id
+        WHERE t.tutor_code IN (${orderCodes.map(() => '?').join(',')}) AND t.is_deleted = FALSE
+    `;
+    const rows = await db.query(city, sql, orderCodes);
+    return rows;
+  }
 }
 
 module.exports = TutorsModel

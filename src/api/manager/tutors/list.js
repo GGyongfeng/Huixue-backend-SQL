@@ -25,7 +25,8 @@ router.get('/', async (req, res, next) => {
       order_tags,
       student_level,
       is_visible,
-      created_at
+      created_at,
+      created_by_name
     } = req.query
 
     // console.log('步骤1: 处理筛选条件')
@@ -48,7 +49,8 @@ router.get('/', async (req, res, next) => {
       order_tags: processArrayParam(order_tags),
       student_level: processArrayParam(student_level),
       is_visible: processArrayParam(is_visible),
-      created_at: processArrayParam(created_at)
+      created_at: processArrayParam(created_at),
+      created_by_name: processArrayParam(created_by_name)
     }
 
     console.log('filters: ', filters)

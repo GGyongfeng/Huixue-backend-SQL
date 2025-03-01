@@ -102,6 +102,12 @@ class TutorListQueryBuilder extends BaseQueryBuilder {
       this.values.push(startTime, endTime)
     }
 
+    // 添加 created_by_name 的筛选
+    if (filters.created_by_name) {
+      this.sql += ` AND c.realname IN (${filters.created_by_name.map(() => '?').join(',')})`
+      this.values.push(...filters.created_by_name)
+    }
+
     // 返回 this 以支持链式调用
     return this
   }
@@ -227,6 +233,10 @@ class TutorListQueryBuilder extends BaseQueryBuilder {
     const countSql = `
       SELECT COUNT(*) as total 
       FROM tutor_orders t 
+      LEFT JOIN staff c ON t.created_by = c.id
+      LEFT JOIN staff u ON t.updated_by = u.id
+      LEFT JOIN staff d ON t.deleted_by = d.id
+      LEFT JOIN staff ds ON t.deal_staff_id = ds.id
       WHERE 1=1 
       ${this.sql.split('WHERE 1=1')[1].split('ORDER BY')[0]}
     `;
